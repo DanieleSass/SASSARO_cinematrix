@@ -49,7 +49,8 @@ int main(void) {
     do {
         printf("1 Aggiungi Film\n2 Visualizza Catalogo\n3 Cerca Film per TItolo\n4 Ordina Libreria per anno\n5 Salva ed Esci\nScelta:");
         scanf("%d",&scelta);
-        getchar();
+        //getchar();
+        while (getchar() != '\n'); // pulisce il buffer
 
     switch (scelta) {
 
@@ -57,14 +58,14 @@ int main(void) {
             if (cont>=quantitaarray)    //NON  c'è + spazio
             {
                 quantitaarray+=10;
-                Film** temp = realloc(lista, sizeof(Film*) * quantitaarray);
-                if (temp==NULL)
+                Film** temp_lista = realloc(lista, sizeof(Film*) * quantitaarray);
+                if (temp_lista==NULL)
                 {
                     printf("Errore realloc.\n");
                     free(lista);
                     return 1;
                 }
-                lista = temp;
+                lista = temp_lista;
             }
                 Film* temp=RichiediFilm();
                 lista[cont]=temp;
@@ -105,9 +106,8 @@ int main(void) {
 Film* RichiediFilm()
 {
     Film *film=malloc(sizeof(Film));
-
-    film->titolo = malloc(50 * sizeof(char));
-    film->regista = malloc(50 * sizeof(char));
+    film->titolo = calloc(50, sizeof(char));
+    film->regista = calloc(50, sizeof(char));
 
     printf("Nome Film\n");
     fgets(film->titolo, 50, stdin);
@@ -118,7 +118,7 @@ Film* RichiediFilm()
     do
     {
         printf("Anno di pubblicazione: \n");
-        if (scanf("%d", &film->anno) != 1) {
+        if (scanf("%d", &film->anno) != 1 || film->anno < 1900 || film->anno > 2025) {
             printf("Errore\n");
             while (getchar() != '\n'); // pulisce il buffer
         } else {
@@ -129,7 +129,7 @@ Film* RichiediFilm()
 
     do {
         printf("Durata: \n");
-        if (scanf("%f", &film->durata) != 1) {
+        if (scanf("%f", &film->durata) != 1 || film->durata <= 0) {
             printf("Errore\n");
             while (getchar() != '\n'); // pulisce il buffer
         } else {
@@ -153,7 +153,7 @@ void StampaFilm(Film** lista,int cont)
     printf("Lista:\n");
     for (int i=0;i<cont;i++)
     {
-        printf("Nome: %s Regista: %s Anno Pubblicazione: %d Durata: %f\n",lista[i]->titolo,lista[i]->regista,lista[i]->anno,lista[i]->durata);
+        printf("Nome: %s Regista: %s Anno Pubblicazione: %d Durata: %.2f\n",lista[i]->titolo,lista[i]->regista,lista[i]->anno,lista[i]->durata);
     }
 }
 
@@ -208,8 +208,7 @@ int file_esiste()
 
 
 Film** leggi_file(int* dim) {
-    FILE* file_bin;
-    fopen(nome_file,"rb");
+    FILE* file_bin=fopen(nome_file,"rb");
     if (file_bin==NULL)
     {
         printf("Errore apertura file");
@@ -229,8 +228,8 @@ Film** leggi_file(int* dim) {
     for (int i = 0; i < *dim; i++)
     {
         listone[i] = malloc(sizeof(Film));
-        listone[i]->titolo = malloc(50);
-        listone[i]->regista = malloc(50);
+        listone[i]->titolo = calloc(50,sizeof(char));
+        listone[i]->regista = calloc(50,sizeof(char));
 
         fread(listone[i]->titolo, sizeof(char), 50, file_bin);
         fread(listone[i]->regista, sizeof(char), 50, file_bin);
